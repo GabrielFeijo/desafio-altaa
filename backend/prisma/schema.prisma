@@ -1,0 +1,90 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    OWNER
+    ADMIN
+    MEMBER
+}
+
+model User {
+    id        String   @id @default(uuid())
+    email     String   @unique
+    password  String
+    name      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    activeCompanyId String?
+    activeCompany   Company? @relation("ActiveCompany", fields: [activeCompanyId], references: [id])
+
+    memberships Membership[]
+    invites     Invite[]
+
+    @@index([email])
+    @@index([activeCompanyId])
+    @@map("users")
+}
+
+model Company {
+    id        String   @id @default(uuid())
+    name      String
+    logo      String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    members     Membership[]
+    invites     Invite[]
+    activeUsers User[]       @relation("ActiveCompany")
+
+    @@index([name])
+    @@map("companies")
+}
+
+model Membership {
+    id        String   @id @default(uuid())
+    role      Role     @default(MEMBER)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    companyId String
+    company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, companyId])
+    @@index([userId])
+    @@index([companyId])
+    @@index([role])
+    @@map("memberships")
+}
+
+model Invite {
+    id        String   @id @default(uuid())
+    email     String
+    token     String   @unique
+    role      Role     @default(MEMBER)
+    accepted  Boolean  @default(false)
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    companyId String
+    company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+    userId String?
+    user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+    @@index([email])
+    @@index([token])
+    @@index([companyId])
+    @@index([accepted])
+    @@map("invites")
+}
