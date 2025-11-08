@@ -1,9 +1,9 @@
-"use client";
-
+import { Suspense } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
-import { UserNav } from "./user-nav";
+import { UserNav } from "./user-nav-wrapper";
+import UserNavSkeleton from "../skeleton/user-nav-skeleton";
 
 export function Header() {
     return (
@@ -15,7 +15,9 @@ export function Header() {
 
                 <div className="flex flex-1 items-center justify-end space-x-4">
                     <ThemeToggle />
-                    <UserNav />
+                    <Suspense fallback={<UserNavSkeleton />}>
+                        <UserNav />
+                    </Suspense>
                 </div>
             </div>
         </header>

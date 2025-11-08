@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
     Table,
@@ -16,14 +16,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompaniesResponse, Company } from "@/types";
 import { formatDate, translateRole, getRoleColor } from "@/lib/utils";
-import { Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { companyService } from "@/services/company.service";
+import { Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
+import { selectCompanyAction } from "@/lib/actions/company.actions";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
 import api from "@/services/api";
 
 export function CompaniesTable() {
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
     const [selectingId, setSelectingId] = useState<string | null>(null);
     const [companies, setCompanies] = useState<Company[]>([]);
     const [meta, setMeta] = useState({
@@ -46,6 +46,7 @@ export function CompaniesTable() {
         } catch (error) {
             console.error("Error fetching companies:", error);
             setCompanies([]);
+            toast.error("Erro ao carregar empresas");
         } finally {
             setLoading(false);
         }
@@ -61,20 +62,19 @@ export function CompaniesTable() {
 
     const handleSelectCompany = async (companyId: string) => {
         setSelectingId(companyId);
-        try {
-            await companyService.select(companyId);
-            toast.success("Empresa selecionada com sucesso!");
-            router.push(`/company/${companyId}`);
-        } catch (err) {
-            const error = err as AxiosError<{ message?: string }>;
-            const errorMessage =
-                error.response?.data?.message ?? error.message ?? "Erro ao selecionar empresa";
-            toast.error(errorMessage);
-        } finally {
-            setSelectingId(null);
-        }
-    };
 
+        startTransition(async () => {
+            const result = await selectCompanyAction(companyId);
+
+            if (result.success) {
+                toast.success("Empresa selecionada com sucesso!");
+                router.push(`/company/${companyId}`);
+            } else {
+                toast.error(result.message || "Erro ao selecionar empresa");
+                setSelectingId(null);
+            }
+        });
+    };
 
     if (loading) {
         return (
@@ -105,9 +105,6 @@ export function CompaniesTable() {
                     <p className="text-muted-foreground mb-4">
                         Você ainda não faz parte de nenhuma empresa
                     </p>
-                    <Button onClick={() => router.push("/companies")}>
-                        Criar Empresa
-                    </Button>
                 </CardContent>
             </Card>
         );
@@ -156,10 +153,19 @@ export function CompaniesTable() {
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleSelectCompany(company.id)}
-                                            disabled={selectingId === company.id}
+                                            disabled={isPending && selectingId === company.id}
                                         >
-                                            <Eye className="h-4 w-4 mr-2" />
-                                            Visualizar
+                                            {isPending && selectingId === company.id ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                    Selecionando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Eye className="h-4 w-4 mr-2" />
+                                                    Visualizar
+                                                </>
+                                            )}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
