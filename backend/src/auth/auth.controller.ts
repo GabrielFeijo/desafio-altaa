@@ -22,6 +22,7 @@ import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { OptionalAuthGuard } from './guards/optional-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -84,7 +85,7 @@ export class AuthController {
 		});
 	}
 
-	@Public()
+	@UseGuards(OptionalAuthGuard)
 	@Post('accept-invite')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Aceitar convite para empresa' })
@@ -102,10 +103,10 @@ export class AuthController {
 	})
 	async acceptInvite(
 		@Body() acceptInviteDto: AcceptInviteDto,
-		@Req() req: Request,
+		@CurrentUser() user: { userId: string } | null,
 		@Res() res: Response
 	) {
-		const currentUserId = (req as any).user?.userId;
+		const currentUserId = user?.userId || undefined;
 
 		const result = await this.authService.acceptInvite(
 			acceptInviteDto,

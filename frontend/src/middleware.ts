@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
 		pathname.startsWith(route)
 	);
 
-	if (isPublicRoute && token) {
+	if (isPublicRoute && token && pathname !== '/accept-invite') {
 		return NextResponse.redirect(new URL('/dashboard', request.url));
 	}
 
