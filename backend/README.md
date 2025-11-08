@@ -238,36 +238,6 @@ backend/
 └── tsconfig.json
 ```
 
-### Fluxo de Requisição
-
-```
-┌──────────────┐
-│   Cliente    │
-└──────┬───────┘
-       │ HTTP Request
-       ▼
-┌──────────────────────┐
-│   NestJS Server      │
-│                      │
-│  1. Controller       │ ◄─── Recebe requisição
-│      │               │
-│      ▼               │
-│  2. Guard            │ ◄─── Valida JWT e permissões
-│      │               │
-│      ▼               │
-│  3. Validation Pipe │ ◄─── Valida DTO
-│      │               │
-│      ▼               │
-│  4. Service          │ ◄─── Lógica de negócio
-│      │               │
-│      ▼               │
-│  5. Prisma           │ ◄─── Query no banco
-│      │               │
-│      ▼               │
-│  6. Database         │ ◄─── PostgreSQL
-└──────────────────────┘
-```
-
 ### Migrações
 
 ```bash

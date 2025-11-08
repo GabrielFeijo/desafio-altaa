@@ -229,16 +229,6 @@ make test-e2e
 docker-compose exec backend npm run test:e2e
 ```
 
-**Cobertura de Testes:**
-
-- ✅ Autenticação (signup, login, logout, accept-invite)
-- ✅ Empresas (CRUD, seleção de empresa ativa)
-- ✅ Convites (criação, listagem, validação, cancelamento)
-- ✅ Membros (remoção, atualização de papel)
-- ✅ Validações de DTOs
-- ✅ Permissões e guards
-- ✅ Casos de erro
-
 ### Frontend (Next.js)
 
 ```bash
