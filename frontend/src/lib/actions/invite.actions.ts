@@ -96,8 +96,13 @@ export async function validateInviteToken(token: string) {
 			};
 		}
 
+		const response = await api.get('/invite/validate', {
+			params: { token },
+		});
+
 		return {
 			valid: true,
+			data: response.data,
 			message: 'Token válido',
 		};
 	} catch (err) {

@@ -140,7 +140,9 @@ export async function updateMemberRoleAction(
 	} catch (err) {
 		const error = err as AxiosError<{ message?: string }>;
 		const errorMessage =
-			error.response?.data?.message ?? error.message ?? 'Erro ao criar conta';
+			error.response?.data?.message ??
+			error.message ??
+			'Erro ao atualizar papel';
 
 		return {
 			success: false,
@@ -166,6 +168,36 @@ export async function selectCompanyAction(companyId: string) {
 		return {
 			success: false,
 			message: errorMessage,
+		};
+	}
+}
+
+export async function getCompaniesAction(page: number = 1, limit: number = 10) {
+	try {
+		const headers = await getAuthHeaders();
+		const response = await api.get('/companies', {
+			params: { page, limit },
+			headers,
+		});
+
+		return {
+			success: true,
+			data: response.data,
+		};
+	} catch (err) {
+		const error = err as AxiosError<{ message?: string }>;
+		const errorMessage =
+			error.response?.data?.message ??
+			error.message ??
+			'Erro ao carregar empresas';
+
+		return {
+			success: false,
+			message: errorMessage,
+			data: {
+				data: [],
+				meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+			},
 		};
 	}
 }

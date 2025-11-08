@@ -1,7 +1,6 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import api from '@/services/api';
 import { AxiosError } from 'axios';
 
@@ -78,33 +77,6 @@ export async function signupAction(formData: FormData) {
 			message: errorMessage,
 		};
 	}
-}
-
-export async function logoutAction() {
-	try {
-		const cookieStore = await cookies();
-		const token = cookieStore.get('token');
-
-		if (token) {
-			await api.post(
-				'/auth/logout',
-				{},
-				{
-					headers: {
-						Cookie: `token=${token.value}`,
-					},
-				}
-			);
-		}
-
-		cookieStore.delete('token');
-	} catch (error) {
-		console.error('Erro ao fazer logout:', error);
-		const cookieStore = await cookies();
-		cookieStore.delete('token');
-	}
-
-	redirect('/login');
 }
 
 export async function getCurrentUser() {
