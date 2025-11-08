@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
@@ -88,38 +89,6 @@ export class CompanyService {
 		};
 	}
 
-	async selectCompany(userId: string, companyId: string) {
-		const membership = await this.prisma.membership.findUnique({
-			where: {
-				userId_companyId: {
-					userId,
-					companyId,
-				},
-			},
-			include: {
-				company: true,
-			},
-		});
-
-		if (!membership) {
-			throw new NotFoundException(
-				'Empresa não encontrada ou você não é membro'
-			);
-		}
-
-		await this.prisma.user.update({
-			where: { id: userId },
-			data: { activeCompanyId: companyId },
-		});
-
-		return {
-			id: membership.company.id,
-			name: membership.company.name,
-			logo: membership.company.logo,
-			role: membership.role,
-		};
-	}
-
 	async findOne(companyId: string, userId: string) {
 		const membership = await this.prisma.membership.findUnique({
 			where: {
@@ -170,8 +139,84 @@ export class CompanyService {
 			id: company.id,
 			name: company.name,
 			logo: company.logo,
+			role: membership.role,
 			members,
 			memberCount: members.length,
+		};
+	}
+
+	async update(
+		companyId: string,
+		updateCompanyDto: UpdateCompanyDto,
+		userId: string
+	) {
+		const membership = await this.prisma.membership.findUnique({
+			where: {
+				userId_companyId: {
+					userId,
+					companyId,
+				},
+			},
+		});
+
+		if (!membership) {
+			throw new ForbiddenException('Você não é membro desta empresa');
+		}
+
+		if (membership.role !== Role.OWNER && membership.role !== Role.ADMIN) {
+			throw new ForbiddenException(
+				'Apenas OWNER e ADMIN podem atualizar empresa'
+			);
+		}
+
+		const company = await this.prisma.company.update({
+			where: { id: companyId },
+			data: {
+				name: updateCompanyDto.name,
+				logo: updateCompanyDto.logo,
+			},
+			select: {
+				id: true,
+				name: true,
+				logo: true,
+			},
+		});
+
+		return {
+			...company,
+			role: membership.role,
+		};
+	}
+
+	async selectCompany(userId: string, companyId: string) {
+		const membership = await this.prisma.membership.findUnique({
+			where: {
+				userId_companyId: {
+					userId,
+					companyId,
+				},
+			},
+			include: {
+				company: true,
+			},
+		});
+
+		if (!membership) {
+			throw new NotFoundException(
+				'Empresa não encontrada ou você não é membro'
+			);
+		}
+
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: { activeCompanyId: companyId },
+		});
+
+		return {
+			id: membership.company.id,
+			name: membership.company.name,
+			logo: membership.company.logo,
+			role: membership.role,
 		};
 	}
 }

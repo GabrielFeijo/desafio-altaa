@@ -2,6 +2,7 @@ import {
 	Controller,
 	Get,
 	Post,
+	Put,
 	Body,
 	Param,
 	Query,
@@ -18,9 +19,12 @@ import {
 } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
-import { SelectCompanyDto } from './dto/select-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('company')
 @Controller()
@@ -79,6 +83,64 @@ export class CompanyController {
 		);
 	}
 
+	@Get('company/:id')
+	@ApiOperation({ summary: 'Buscar detalhes da empresa' })
+	@ApiResponse({
+		status: 200,
+		description: 'Detalhes da empresa',
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Você não tem permissão para acessar esta empresa',
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'Empresa não encontrada',
+	})
+	async findOne(
+		@Param('id') id: string,
+		@CurrentUser() user: { userId: string }
+	) {
+		return this.companyService.findOne(id, user.userId);
+	}
+
+	@Put('company/:id')
+	@UseGuards(RolesGuard)
+	@Roles(Role.OWNER, Role.ADMIN)
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({
+		summary: 'Atualizar empresa',
+		description: 'Apenas OWNER e ADMIN podem atualizar empresa',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'Empresa atualizada com sucesso',
+	})
+	@ApiResponse({
+		status: 403,
+		description: 'Sem permissão (apenas OWNER e ADMIN)',
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'Empresa não encontrada',
+	})
+	async update(
+		@Param('id') id: string,
+		@Body() updateCompanyDto: UpdateCompanyDto,
+		@CurrentUser() user: { userId: string }
+	) {
+		const company = await this.companyService.update(
+			id,
+			updateCompanyDto,
+			user.userId
+		);
+
+		return {
+			message: 'Empresa atualizada com sucesso',
+			company,
+		};
+	}
+
 	@Post('company/:id/select')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Selecionar empresa ativa' })
@@ -100,26 +162,5 @@ export class CompanyController {
 			message: 'Empresa selecionada com sucesso',
 			company,
 		};
-	}
-
-	@Get('company/:id')
-	@ApiOperation({ summary: 'Buscar detalhes da empresa' })
-	@ApiResponse({
-		status: 200,
-		description: 'Detalhes da empresa',
-	})
-	@ApiResponse({
-		status: 403,
-		description: 'Você não tem permissão para acessar esta empresa',
-	})
-	@ApiResponse({
-		status: 404,
-		description: 'Empresa não encontrada',
-	})
-	async findOne(
-		@Param('id') id: string,
-		@CurrentUser() user: { userId: string }
-	) {
-		return this.companyService.findOne(id, user.userId);
 	}
 }
