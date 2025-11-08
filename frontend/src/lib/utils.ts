@@ -43,3 +43,29 @@ export function getRoleColor(role: string): string {
 	};
 	return colors[role] || colors.MEMBER;
 }
+
+export function getInitials(name: string): string {
+	const parts = name.trim().split(/\s+/);
+
+	if (parts.length === 0) return '';
+
+	const first = parts[0][0];
+	const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+
+	return (first + last).toUpperCase();
+}
+
+export function getColorFromName(name: string): string {
+	const colors = [
+		'bg-red-500',
+		'bg-blue-500',
+		'bg-green-500',
+		'bg-yellow-500',
+		'bg-purple-500',
+		'bg-pink-500',
+		'bg-indigo-500',
+		'bg-teal-500',
+	];
+	const index = name.charCodeAt(0) % colors.length;
+	return colors[index];
+}

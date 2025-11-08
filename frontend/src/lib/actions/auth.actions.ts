@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import api from '@/services/api';
 import { AxiosError } from 'axios';
 
@@ -25,7 +26,10 @@ export async function loginAction(formData: FormData) {
 			}
 		}
 
-		return { success: true, message: response.data.message };
+		return {
+			success: true,
+			message: response.data.message || 'Login realizado com sucesso!',
+		};
 	} catch (err) {
 		const error = err as AxiosError<{ message?: string }>;
 		const errorMessage =
@@ -60,7 +64,10 @@ export async function signupAction(formData: FormData) {
 			}
 		}
 
-		return { success: true, message: response.data.message };
+		return {
+			success: true,
+			message: response.data.message || 'Conta criada com sucesso!',
+		};
 	} catch (err) {
 		const error = err as AxiosError<{ message?: string }>;
 		const errorMessage =
@@ -75,13 +82,29 @@ export async function signupAction(formData: FormData) {
 
 export async function logoutAction() {
 	try {
-		await api.post('/auth/logout');
+		const cookieStore = await cookies();
+		const token = cookieStore.get('token');
+
+		if (token) {
+			await api.post(
+				'/auth/logout',
+				{},
+				{
+					headers: {
+						Cookie: `token=${token.value}`,
+					},
+				}
+			);
+		}
+
+		cookieStore.delete('token');
+	} catch (error) {
+		console.error('Erro ao fazer logout:', error);
 		const cookieStore = await cookies();
 		cookieStore.delete('token');
-		return { success: true };
-	} catch {
-		return { success: false };
 	}
+
+	redirect('/login');
 }
 
 export async function getCurrentUser() {
