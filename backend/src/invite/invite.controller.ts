@@ -5,6 +5,7 @@ import {
 	Delete,
 	Body,
 	Param,
+	Query,
 	UseGuards,
 	HttpCode,
 	HttpStatus,
@@ -14,21 +15,23 @@ import {
 	ApiOperation,
 	ApiResponse,
 	ApiBearerAuth,
+	ApiQuery,
 } from '@nestjs/swagger';
 import { InviteService } from './invite.service';
 import { CreateInviteDto } from './dto/create-invite.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('company')
 @Controller()
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('JWT-auth')
 export class InviteController {
 	constructor(private readonly inviteService: InviteService) {}
 
 	@Post('company/:id/invite')
+	@UseGuards(JwtAuthGuard)
 	@HttpCode(HttpStatus.CREATED)
+	@ApiBearerAuth('JWT-auth')
 	@ApiOperation({
 		summary: 'Criar convite para novo membro',
 		description: 'Simula envio de email com link de convite (OWNER e ADMIN)',
@@ -63,6 +66,8 @@ export class InviteController {
 	}
 
 	@Get('company/:id/invites')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('JWT-auth')
 	@ApiOperation({
 		summary: 'Listar convites pendentes da empresa',
 	})
@@ -87,7 +92,9 @@ export class InviteController {
 	}
 
 	@Delete('company/:companyId/invite/:inviteId')
+	@UseGuards(JwtAuthGuard)
 	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
 	@ApiOperation({
 		summary: 'Cancelar convite pendente',
 		description: 'Apenas OWNER e ADMIN podem cancelar convites',
@@ -110,5 +117,36 @@ export class InviteController {
 		@CurrentUser() user: { userId: string }
 	) {
 		return this.inviteService.delete(inviteId, companyId, user.userId);
+	}
+
+	@Public()
+	@Get('invite/validate')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({
+		summary: 'Validar token de convite',
+		description: 'Verifica se o token de convite é válido e não expirou',
+	})
+	@ApiQuery({
+		name: 'token',
+		required: true,
+		type: String,
+		description: 'Token do convite',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'Token válido',
+		schema: {
+			example: {
+				valid: true,
+				expiresAt: '2025-01-15T10:00:00.000Z',
+			},
+		},
+	})
+	@ApiResponse({
+		status: 400,
+		description: 'Token inválido, expirado ou já aceito',
+	})
+	async validateToken(@Query('token') token: string) {
+		return this.inviteService.validateToken(token);
 	}
 }

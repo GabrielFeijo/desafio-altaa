@@ -3,6 +3,7 @@ import {
 	ForbiddenException,
 	ConflictException,
 	NotFoundException,
+	BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInviteDto } from './dto/create-invite.dto';
@@ -184,6 +185,40 @@ export class InviteService {
 
 		return {
 			message: 'Convite cancelado com sucesso',
+		};
+	}
+
+	async validateToken(token: string) {
+		if (!token) {
+			throw new BadRequestException('Token não fornecido');
+		}
+
+		const invite = await this.prisma.invite.findUnique({
+			where: { token },
+			include: {
+				company: {
+					select: {
+						name: true,
+					},
+				},
+			},
+		});
+
+		if (!invite) {
+			throw new NotFoundException('Convite não encontrado');
+		}
+
+		if (invite.accepted) {
+			throw new BadRequestException('Este convite já foi aceito');
+		}
+
+		if (invite.expiresAt < new Date()) {
+			throw new BadRequestException('Este convite expirou');
+		}
+
+		return {
+			valid: true,
+			expiresAt: invite.expiresAt,
 		};
 	}
 }
