@@ -14,50 +14,60 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CompaniesResponse, Company } from "@/types";
+import { Company } from "@/types";
 import { formatDate, translateRole, getRoleColor } from "@/lib/utils";
 import { Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
-import { selectCompanyAction } from "@/lib/actions/company.actions";
+import { selectCompanyAction, getCompaniesAction } from "@/lib/actions/company.actions";
 import { toast } from "sonner";
-import api from "@/services/api";
+
+interface CompaniesData {
+    companies: Company[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
 
 export function CompaniesTable() {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [selectingId, setSelectingId] = useState<string | null>(null);
-    const [companies, setCompanies] = useState<Company[]>([]);
-    const [meta, setMeta] = useState({
-        total: 0,
-        page: 1,
-        limit: 10,
-        totalPages: 1,
+    const [data, setData] = useState<CompaniesData>({
+        companies: [],
+        meta: { total: 0, page: 1, limit: 10, totalPages: 1 },
     });
     const [loading, setLoading] = useState(true);
 
     const fetchCompanies = async (page: number = 1, limit: number = 10) => {
-        try {
-            setLoading(true);
-            const response = await api.get<CompaniesResponse>(
-                `/companies?page=${page}&limit=${limit}`
-            );
+        setLoading(true);
 
-            setCompanies(response.data.data || []);
-            setMeta(response.data.meta);
-        } catch (error) {
-            console.error("Error fetching companies:", error);
-            setCompanies([]);
-            toast.error("Erro ao carregar empresas");
-        } finally {
-            setLoading(false);
+        const result = await getCompaniesAction(page, limit);
+
+        if (result.success && result.data) {
+            const newData = {
+                companies: result.data.data || [],
+                meta: result.data.meta,
+            };
+            setData(newData);
+        } else {
+            toast.error(result.message);
+            setData({
+                companies: [],
+                meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+            });
         }
+
+        setLoading(false);
     };
 
     useEffect(() => {
-        fetchCompanies(1, 10);
+        fetchCompanies();
     }, []);
 
     const handlePageChange = (newPage: number) => {
-        fetchCompanies(newPage, meta.limit);
+        fetchCompanies(newPage, data.meta.limit);
     };
 
     const handleSelectCompany = async (companyId: string) => {
@@ -94,7 +104,7 @@ export function CompaniesTable() {
         );
     }
 
-    if (companies.length === 0) {
+    if (data.companies.length === 0) {
         return (
             <Card>
                 <CardHeader>
@@ -110,10 +120,10 @@ export function CompaniesTable() {
         );
     }
 
-    const currentPage = meta?.page || 1;
-    const totalPages = meta?.totalPages || 1;
-    const total = meta?.total || companies.length;
-    const limit = meta?.limit || 10;
+    const currentPage = data.meta?.page || 1;
+    const totalPages = data.meta?.totalPages || 1;
+    const total = data.meta?.total || data.companies.length;
+    const limit = data.meta?.limit || 10;
     const startItem = ((currentPage - 1) * limit) + 1;
     const endItem = Math.min(currentPage * limit, total);
 
@@ -137,7 +147,7 @@ export function CompaniesTable() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {companies.map((company) => (
+                            {data.companies.map((company) => (
                                 <TableRow key={company.id}>
                                     <TableCell className="font-medium">{company.name}</TableCell>
                                     <TableCell>
@@ -187,7 +197,7 @@ export function CompaniesTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlePageChange(1)}
-                                disabled={currentPage === 1}
+                                disabled={currentPage === 1 || loading}
                                 title="Primeira página"
                             >
                                 <ChevronsLeft className="h-4 w-4" />
@@ -196,7 +206,7 @@ export function CompaniesTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
+                                disabled={currentPage === 1 || loading}
                                 title="Página anterior"
                             >
                                 <ChevronLeft className="h-4 w-4" />
@@ -205,7 +215,7 @@ export function CompaniesTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === totalPages}
+                                disabled={currentPage === totalPages || loading}
                                 title="Próxima página"
                             >
                                 <ChevronRight className="h-4 w-4" />
@@ -214,7 +224,7 @@ export function CompaniesTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlePageChange(totalPages)}
-                                disabled={currentPage === totalPages}
+                                disabled={currentPage === totalPages || loading}
                                 title="Última página"
                             >
                                 <ChevronsRight className="h-4 w-4" />

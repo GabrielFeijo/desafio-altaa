@@ -57,7 +57,7 @@ export function Sidebar() {
 
             <div className="border-t p-4">
                 <p className="text-xs text-muted-foreground">
-                    © 2024 Altaa.ai
+                    © 2025 Altaa.ai
                 </p>
             </div>
         </aside>

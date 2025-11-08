@@ -13,9 +13,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logoutAction } from "@/lib/actions/auth.actions";
 import { toast } from "sonner";
 import { getColorFromName, getInitials } from "@/lib/utils";
+import { authService } from "@/services/auth.service";
 
 interface UserData {
     id: string;
@@ -35,7 +35,8 @@ export function UserNavClient({ user }: UserNavClientProps) {
     const handleLogout = () => {
         startTransition(async () => {
             try {
-                await logoutAction();
+                await authService.logout();
+                router.push("/login");
                 toast.success("Logout realizado com sucesso!");
             } catch {
                 toast.error("Erro ao fazer logout");

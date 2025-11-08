@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -53,9 +53,12 @@ const existingUserSchema = z.object({
 type NewUserFormValues = z.infer<typeof newUserSchema>;
 type ExistingUserFormValues = z.infer<typeof existingUserSchema>;
 
-export function AcceptInviteForm() {
+interface AcceptInviteFormProps {
+    token: string;
+}
+
+export function AcceptInviteForm({ token }: AcceptInviteFormProps) {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
     const [isNewUser, setIsNewUser] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
@@ -64,7 +67,7 @@ export function AcceptInviteForm() {
     const newUserForm = useForm<NewUserFormValues>({
         resolver: zodResolver(newUserSchema),
         defaultValues: {
-            token: searchParams.get("token") || "",
+            token,
             name: "",
             email: "",
             password: "",
@@ -75,17 +78,9 @@ export function AcceptInviteForm() {
     const existingUserForm = useForm<ExistingUserFormValues>({
         resolver: zodResolver(existingUserSchema),
         defaultValues: {
-            token: searchParams.get("token") || "",
+            token,
         },
     });
-
-    useEffect(() => {
-        const token = searchParams.get("token");
-        if (token) {
-            newUserForm.setValue("token", token);
-            existingUserForm.setValue("token", token);
-        }
-    }, [searchParams, newUserForm, existingUserForm]);
 
     const onSubmitNewUser = async (data: NewUserFormValues) => {
         const formData = new FormData();
@@ -131,15 +126,13 @@ export function AcceptInviteForm() {
     const toggleUserType = () => {
         setIsNewUser(!isNewUser);
         newUserForm.reset({
-            token: searchParams.get("token") || "",
+            token,
             name: "",
             email: "",
             password: "",
             confirmPassword: "",
         });
-        existingUserForm.reset({
-            token: searchParams.get("token") || "",
-        });
+        existingUserForm.reset({ token });
     };
 
     return (

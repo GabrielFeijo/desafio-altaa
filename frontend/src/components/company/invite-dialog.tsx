@@ -29,11 +29,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { companyService } from "@/services/company.service";
 import { Role } from "@/types";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
+import { inviteMemberAction } from "@/lib/actions/company.actions";
 
 const inviteSchema = z.object({
     email: z.email({ message: "Email inválido" }),
@@ -69,7 +69,7 @@ export function InviteDialog({
         setLoading(true);
 
         try {
-            const response = await companyService.invite(companyId, data);
+            const { data: response } = await inviteMemberAction(companyId, data.email, data.role);
             toast.success("Convite enviado com sucesso!");
             toast.info(`Token: ${response.invite.token}`, { duration: 10000 });
             form.reset();
