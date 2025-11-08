@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { getColorFromName, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
 
 interface UserData {
@@ -57,7 +57,7 @@ export function UserNavClient({ user }: UserNavClientProps) {
                     ) : (
                         <Avatar className="h-10 w-10">
                             <AvatarFallback
-                                className={`${user ? getColorFromName(user.name) : 'bg-primary'} text-white`}
+                                className={`bg-primary text-white dark:text-black`}
                             >
                                 {user ? getInitials(user.name) : "U"}
                             </AvatarFallback>

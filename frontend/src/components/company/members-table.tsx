@@ -23,7 +23,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Member, Role } from "@/types";
-import { formatDate, translateRole, getRoleColor } from "@/lib/utils";
+import { formatDate, translateRole } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
@@ -111,7 +111,7 @@ export function MembersTable({
                                         <TableCell className="font-medium">{member.name}</TableCell>
                                         <TableCell>{member.email}</TableCell>
                                         <TableCell>
-                                            <Badge className={getRoleColor(member.role)}>
+                                            <Badge>
                                                 {translateRole(member.role)}
 
                                             </Badge>

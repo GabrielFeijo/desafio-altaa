@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     Table,
     TableBody,
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Company } from "@/types";
-import { formatDate, translateRole, getRoleColor } from "@/lib/utils";
+import { formatDate, translateRole } from "@/lib/utils";
 import { Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
 import { selectCompanyAction, getCompaniesAction } from "@/lib/actions/company.actions";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ interface CompaniesData {
 
 export function CompaniesTable() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
     const [selectingId, setSelectingId] = useState<string | null>(null);
     const [data, setData] = useState<CompaniesData>({
@@ -40,7 +41,9 @@ export function CompaniesTable() {
     });
     const [loading, setLoading] = useState(true);
 
-    const fetchCompanies = async (page: number = 1, limit: number = 10) => {
+    const currentPage = parseInt(searchParams.get("page") || "1");
+
+    const fetchCompanies = async (page: number, limit = 10) => {
         setLoading(true);
 
         const result = await getCompaniesAction(page, limit);
@@ -63,11 +66,27 @@ export function CompaniesTable() {
     };
 
     useEffect(() => {
-        fetchCompanies();
-    }, []);
+        fetchCompanies(currentPage);
+
+        const handleCompanyCreated = () => {
+            fetchCompanies(currentPage);
+        };
+
+        window.addEventListener('companyCreated', handleCompanyCreated);
+
+        return () => {
+            window.removeEventListener('companyCreated', handleCompanyCreated);
+        };
+    }, [currentPage]);
+
+    const updateSearchParams = (page: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", page.toString());
+        router.push(`?${params.toString()}`, { scroll: false });
+    };
 
     const handlePageChange = (newPage: number) => {
-        fetchCompanies(newPage, data.meta.limit);
+        updateSearchParams(newPage);
     };
 
     const handleSelectCompany = async (companyId: string) => {
@@ -120,7 +139,6 @@ export function CompaniesTable() {
         );
     }
 
-    const currentPage = data.meta?.page || 1;
     const totalPages = data.meta?.totalPages || 1;
     const total = data.meta?.total || data.companies.length;
     const limit = data.meta?.limit || 10;
@@ -151,7 +169,7 @@ export function CompaniesTable() {
                                 <TableRow key={company.id}>
                                     <TableCell className="font-medium">{company.name}</TableCell>
                                     <TableCell>
-                                        <Badge className={getRoleColor(company.role)}>
+                                        <Badge>
                                             {translateRole(company.role)}
                                         </Badge>
                                     </TableCell>

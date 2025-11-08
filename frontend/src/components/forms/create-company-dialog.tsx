@@ -62,6 +62,7 @@ export function CreateCompanyDialog() {
                 form.reset();
                 setOpen(false);
                 router.refresh();
+                window.dispatchEvent(new CustomEvent('companyCreated'));
             } else {
                 toast.error(result.message);
             }

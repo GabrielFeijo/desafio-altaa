@@ -34,16 +34,6 @@ export function translateRole(role: string): string {
 	return roles[role] || role;
 }
 
-export function getRoleColor(role: string): string {
-	const colors: Record<string, string> = {
-		OWNER:
-			'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-		ADMIN: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-		MEMBER: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-	};
-	return colors[role] || colors.MEMBER;
-}
-
 export function getInitials(name: string): string {
 	const parts = name.trim().split(/\s+/);
 
@@ -53,19 +43,4 @@ export function getInitials(name: string): string {
 	const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
 
 	return (first + last).toUpperCase();
-}
-
-export function getColorFromName(name: string): string {
-	const colors = [
-		'bg-red-500',
-		'bg-blue-500',
-		'bg-green-500',
-		'bg-yellow-500',
-		'bg-purple-500',
-		'bg-pink-500',
-		'bg-indigo-500',
-		'bg-teal-500',
-	];
-	const index = name.charCodeAt(0) % colors.length;
-	return colors[index];
 }

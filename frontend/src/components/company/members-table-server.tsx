@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UpdateMemberRoleDialog } from "@/components/forms/update-member-role-dialog";
 import { Member, Role } from "@/types";
-import { formatDate, translateRole, getRoleColor } from "@/lib/utils";
+import { formatDate, translateRole } from "@/lib/utils";
 import { MoreVertical, Trash2, Shield } from "lucide-react";
 import { RemoveMemberDialog } from "./remove-member-dialog";
 
@@ -90,7 +90,7 @@ export function MembersTableServer({
                                         <TableCell className="font-medium">{member.name}</TableCell>
                                         <TableCell>{member.email}</TableCell>
                                         <TableCell>
-                                            <Badge className={getRoleColor(member.role)}>
+                                            <Badge>
                                                 {translateRole(member.role)}
                                             </Badge>
                                         </TableCell>

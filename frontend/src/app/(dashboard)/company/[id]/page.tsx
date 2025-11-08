@@ -10,7 +10,7 @@ import { EditCompanyDialogTrigger } from "@/components/company/edit-company-dial
 import { InviteDialogTrigger } from "@/components/company/invite-dialog-trigger";
 import { MembersTableServer } from "@/components/company/members-table-server";
 import CompanySkeleton from "@/components/skeleton/company-skeleton";
-import { getRoleColor, translateRole } from "@/lib/utils";
+import { translateRole } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 async function getCompany(id: string): Promise<Company | null> {
@@ -51,7 +51,7 @@ async function CompanyContent({ id }: { id: string }) {
           <h1 className="text-3xl font-bold tracking-tight">{company.name}</h1>
           <div className="text-muted-foreground flex gap-2">
             <p>Você é</p>
-            <Badge className={getRoleColor(company.role)} >
+            <Badge>
               {translateRole(company.role)}
             </Badge>
           </div>
