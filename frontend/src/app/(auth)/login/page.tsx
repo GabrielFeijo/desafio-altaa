@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -24,10 +24,9 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { authService } from "@/services/auth.service";
+import { loginAction } from "@/lib/actions/auth.actions";
 import { toast } from "sonner";
-import { LogIn, Loader2 } from "lucide-react";
-import { AxiosError } from "axios";
+import { LogIn, Loader2, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
     email: z.email({ message: "Email inválido" }),
@@ -38,7 +37,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -49,20 +49,20 @@ export default function LoginPage() {
     });
 
     const onSubmit = async (data: LoginFormValues) => {
-        setLoading(true);
+        const formData = new FormData();
+        formData.append("email", data.email);
+        formData.append("password", data.password);
 
-        try {
-            const response = await authService.login(data);
-            toast.success(response.message || "Login realizado com sucesso!");
-            router.push("/dashboard");
-        } catch (err) {
-            const error = err as AxiosError<{ message?: string }>;
-            const errorMessage =
-                error.response?.data?.message ?? error.message ?? "Erro ao fazer login";
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false);
-        }
+        startTransition(async () => {
+            const result = await loginAction(formData);
+
+            if (result.success) {
+                toast.success(result.message);
+                router.push("/dashboard");
+            } else {
+                toast.error(result.message);
+            }
+        });
     };
 
     return (
@@ -89,7 +89,7 @@ export default function LoginPage() {
                                             <Input
                                                 type="email"
                                                 placeholder="seu@email.com"
-                                                disabled={loading}
+                                                disabled={isPending}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -104,12 +104,28 @@ export default function LoginPage() {
                                     <FormItem>
                                         <FormLabel>Senha</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="password"
-                                                placeholder="••••••••"
-                                                disabled={loading}
-                                                {...field}
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={showPassword ? "text" : "password"}
+                                                    placeholder="••••••••"
+                                                    disabled={isPending}
+                                                    {...field}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    disabled={isPending}
+                                                >
+                                                    {showPassword ? (
+                                                        <EyeOff className="h-4 w-4" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -117,8 +133,8 @@ export default function LoginPage() {
                             />
                         </CardContent>
                         <CardFooter className="flex flex-col space-y-4">
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? (
+                            <Button type="submit" className="w-full" disabled={isPending}>
+                                {isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         Entrando...

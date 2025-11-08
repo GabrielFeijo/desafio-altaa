@@ -17,8 +17,7 @@ export default function DashboardPage() {
             </div>
 
             <StatsCards />
-            <CompaniesTable
-            />
+            <CompaniesTable />
         </div>
     );
 }

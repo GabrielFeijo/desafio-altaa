@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User } from "lucide-react";
 import { getUserProfile } from "@/lib/actions/user.actions";
 import { ProfileForm } from "@/components/forms/profile-form";
 import { PasswordForm } from "@/components/forms/password-form";
 import ProfileSkeleton from "@/components/skeleton/profile-skeleton";
+import { getInitials } from "@/lib/utils";
 
 async function ProfileContent() {
     const result = await getUserProfile();
@@ -26,7 +26,9 @@ async function ProfileContent() {
                 <CardHeader>
                     <div className="flex items-center space-x-4">
                         <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="h-8 w-8 text-primary" />
+                            <p className="text-xl text-primary">
+                                {user ? getInitials(user.name) : "U"}
+                            </p>
                         </div>
                         <div>
                             <CardTitle>{user.name}</CardTitle>

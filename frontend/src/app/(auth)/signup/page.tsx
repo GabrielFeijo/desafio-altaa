@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -24,15 +24,14 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { authService } from "@/services/auth.service";
+import { signupAction } from "@/lib/actions/auth.actions";
 import { toast } from "sonner";
-import { UserPlus, Loader2 } from "lucide-react";
-import { AxiosError } from "axios";
+import { UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 
 const signupSchema = z
     .object({
         name: z.string().min(2, { message: "Nome deve ter no mínimo 2 caracteres" }),
-        email: z.email({ message: "Email inválido" }),
+        email: z.string().email({ message: "Email inválido" }),
         password: z.string().min(6, { message: "Senha deve ter no mínimo 6 caracteres" }),
         confirmPassword: z.string(),
     })
@@ -45,7 +44,9 @@ type SignUpFormValues = z.infer<typeof signupSchema>;
 
 export default function SignUpPage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const form = useForm<SignUpFormValues>({
         resolver: zodResolver(signupSchema),
@@ -58,24 +59,21 @@ export default function SignUpPage() {
     });
 
     const onSubmit = async (data: SignUpFormValues) => {
-        setLoading(true);
+        const formData = new FormData();
+        formData.append("name", data.name);
+        formData.append("email", data.email);
+        formData.append("password", data.password);
 
-        try {
-            const response = await authService.signup({
-                name: data.name,
-                email: data.email,
-                password: data.password,
-            });
-            toast.success(response.message || "Conta criada com sucesso!");
-            router.push("/dashboard");
-        } catch (err) {
-            const error = err as AxiosError<{ message?: string }>;
-            const errorMessage =
-                error.response?.data?.message ?? error.message ?? "Erro ao criar conta";
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false);
-        }
+        startTransition(async () => {
+            const result = await signupAction(formData);
+
+            if (result.success) {
+                toast.success(result.message);
+                router.push("/dashboard");
+            } else {
+                toast.error(result.message);
+            }
+        });
     };
 
     return (
@@ -101,7 +99,7 @@ export default function SignUpPage() {
                                         <FormControl>
                                             <Input
                                                 placeholder="João Silva"
-                                                disabled={loading}
+                                                disabled={isPending}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -119,7 +117,7 @@ export default function SignUpPage() {
                                             <Input
                                                 type="email"
                                                 placeholder="seu@email.com"
-                                                disabled={loading}
+                                                disabled={isPending}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -134,12 +132,28 @@ export default function SignUpPage() {
                                     <FormItem>
                                         <FormLabel>Senha</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="password"
-                                                placeholder="••••••••"
-                                                disabled={loading}
-                                                {...field}
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={showPassword ? "text" : "password"}
+                                                    placeholder="••••••••"
+                                                    disabled={isPending}
+                                                    {...field}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    disabled={isPending}
+                                                >
+                                                    {showPassword ? (
+                                                        <EyeOff className="h-4 w-4" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -152,12 +166,28 @@ export default function SignUpPage() {
                                     <FormItem>
                                         <FormLabel>Confirmar senha</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                type="password"
-                                                placeholder="••••••••"
-                                                disabled={loading}
-                                                {...field}
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={showConfirmPassword ? "text" : "password"}
+                                                    placeholder="••••••••"
+                                                    disabled={isPending}
+                                                    {...field}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                    disabled={isPending}
+                                                >
+                                                    {showConfirmPassword ? (
+                                                        <EyeOff className="h-4 w-4" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -165,8 +195,8 @@ export default function SignUpPage() {
                             />
                         </CardContent>
                         <CardFooter className="flex flex-col space-y-4">
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? (
+                            <Button type="submit" className="w-full" disabled={isPending}>
+                                {isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         Criando conta...
