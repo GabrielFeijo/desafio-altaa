@@ -2,6 +2,8 @@
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { CompaniesTable } from "@/components/dashboard/companies-table";
 import { CreateCompanyDialog } from "@/components/forms/create-company-dialog";
+import { Suspense } from "react";
+import CompaniesTableSkeleton from "@/components/skeleton/companies-table-skeleton";
 
 export default function DashboardPage() {
     return (
@@ -17,7 +19,9 @@ export default function DashboardPage() {
             </div>
 
             <StatsCards />
-            <CompaniesTable />
+            <Suspense fallback={<CompaniesTableSkeleton />}>
+                <CompaniesTable />
+            </Suspense>
         </div>
     );
 }

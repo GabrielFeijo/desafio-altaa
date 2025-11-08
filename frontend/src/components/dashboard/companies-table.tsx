@@ -13,12 +13,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Company } from "@/types";
 import { formatDate, translateRole } from "@/lib/utils";
 import { Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
 import { selectCompanyAction, getCompaniesAction } from "@/lib/actions/company.actions";
 import { toast } from "sonner";
+import CompaniesTableSkeleton from "../skeleton/companies-table-skeleton";
 
 interface CompaniesData {
     companies: Company[];
@@ -107,19 +107,7 @@ export function CompaniesTable() {
 
     if (loading) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Minhas Empresas</CardTitle>
-                    <CardDescription>Empresas que você faz parte</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <Skeleton key={i} className="h-12 w-full" />
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+            <CompaniesTableSkeleton />
         );
     }
 
