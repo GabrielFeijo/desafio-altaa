@@ -123,4 +123,90 @@ export class MembershipService {
 			message: 'Membro removido com sucesso',
 		};
 	}
+
+	async updateMemberRole(
+		companyId: string,
+		memberId: string,
+		newRole: Role,
+		userId: string
+	) {
+		const updaterMembership = await this.prisma.membership.findUnique({
+			where: {
+				userId_companyId: {
+					userId,
+					companyId,
+				},
+			},
+		});
+
+		if (!updaterMembership) {
+			throw new ForbiddenException('Você não é membro desta empresa');
+		}
+
+		if (
+			updaterMembership.role !== Role.OWNER &&
+			updaterMembership.role !== Role.ADMIN
+		) {
+			throw new ForbiddenException('Apenas OWNER e ADMIN podem alterar papéis');
+		}
+
+		const memberToUpdate = await this.prisma.membership.findUnique({
+			where: {
+				userId_companyId: {
+					userId: memberId,
+					companyId,
+				},
+			},
+		});
+
+		if (!memberToUpdate) {
+			throw new NotFoundException('Membro não encontrado nesta empresa');
+		}
+
+		if (updaterMembership.role === Role.ADMIN) {
+			if (
+				memberToUpdate.role === Role.OWNER ||
+				memberToUpdate.role === Role.ADMIN
+			) {
+				throw new ForbiddenException(
+					'ADMIN não pode alterar papel de OWNER ou ADMIN'
+				);
+			}
+		}
+
+		if (
+			userId === memberId &&
+			memberToUpdate.role === Role.OWNER &&
+			newRole !== Role.OWNER
+		) {
+			const ownerCount = await this.prisma.membership.count({
+				where: {
+					companyId,
+					role: Role.OWNER,
+				},
+			});
+
+			if (ownerCount === 1) {
+				throw new ForbiddenException(
+					'Não é possível remover o papel de OWNER do único proprietário. Adicione outro OWNER primeiro.'
+				);
+			}
+		}
+
+		await this.prisma.membership.update({
+			where: {
+				userId_companyId: {
+					userId: memberId,
+					companyId,
+				},
+			},
+			data: {
+				role: newRole,
+			},
+		});
+
+		return {
+			message: 'Papel atualizado com sucesso',
+		};
+	}
 }
