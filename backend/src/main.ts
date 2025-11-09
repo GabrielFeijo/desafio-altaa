@@ -40,6 +40,7 @@ async function bootstrap() {
 
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup('api/docs', app, document, {
+		customfavIcon: 'https://i.imgur.com/RSnFZIW.png',
 		customSiteTitle: 'Altaa.ai API',
 		customJs: [
 			'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
