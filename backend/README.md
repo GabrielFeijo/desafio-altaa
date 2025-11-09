@@ -269,10 +269,4 @@ npm run prisma:studio
 ```bash
 # Todos os testes
 npm run test:e2e
-
-# Com cobertura
-npm run test:cov
-
-# Watch mode
-npm run test:watch
 ```

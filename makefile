@@ -60,16 +60,6 @@ seed:
 	@docker-compose exec backend npm run prisma:seed
 	@echo "$(GREEN) Banco de dados populado!$(NC)"
 
-test:
-	@echo "$(YELLOW)🧪 Executando testes...$(NC)"
-	@docker-compose exec backend npm run test
-	@echo "$(GREEN) Testes concluídos!$(NC)"
-
-test-e2e:
-	@echo "$(YELLOW)🧪 Executando testes E2E (fim a fim)...$(NC)"
-	@docker-compose exec backend npm run test:e2e
-	@echo "$(GREEN) Testes E2E concluídos!$(NC)"
-
 shell-backend:
 	@docker-compose exec backend sh
 

@@ -192,27 +192,11 @@ make studio          # Abre Prisma Studio (GUI do banco)
 make shell-db        # Acessa PostgreSQL via psql
 ```
 
-### Comandos de Teste
-
-```bash
-make test            # Executa testes unitários
-make test-e2e        # Executa testes E2E
-```
-
 ### Comandos de Build
 
 ```bash
 make build           # Reconstrói todas as imagens Docker
 make rebuild         # Reconstrói e inicia serviços
-```
-
-### Comandos de Manutenção
-
-```bash
-make health          # Verifica saúde dos serviços
-make prune           # Remove recursos não utilizados do Docker
-make shell-backend   # Shell interativo no container backend
-make shell-frontend  # Shell interativo no container frontend
 ```
 
 ---
@@ -233,9 +217,7 @@ docker-compose exec backend npm run test:e2e
 
 ```bash
 cd frontend
-npm run test:e2e           # Testes E2E com Playwright
-npm run test:e2e:ui        # UI interativa do Playwright
-npm run test:e2e:headed    # Testes com browser visível
+npm run test
 ```
 
 ---
