@@ -6,9 +6,8 @@ import {
 	HttpCode,
 	HttpStatus,
 	UseGuards,
-	Req,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import {
 	ApiTags,
 	ApiOperation,

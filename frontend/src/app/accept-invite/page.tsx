@@ -5,6 +5,8 @@ import { validateInviteToken } from "@/lib/actions/invite.actions";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 interface AcceptInvitePageProps {
     searchParams: Promise<{ token?: string }>;
 }

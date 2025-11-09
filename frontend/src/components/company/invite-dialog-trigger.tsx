@@ -38,7 +38,7 @@ import { Loader2, UserPlus } from "lucide-react";
 
 const inviteSchema = z.object({
     email: z.email({ message: "Email inválido" }),
-    role: z.nativeEnum(Role),
+    role: z.enum(Role),
 });
 
 type InviteFormValues = z.infer<typeof inviteSchema>;

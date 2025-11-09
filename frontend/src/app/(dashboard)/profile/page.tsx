@@ -7,6 +7,8 @@ import { PasswordForm } from "@/components/forms/password-form";
 import ProfileSkeleton from "@/components/skeleton/profile-skeleton";
 import { getInitials } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 async function ProfileContent() {
     const result = await getUserProfile();
 

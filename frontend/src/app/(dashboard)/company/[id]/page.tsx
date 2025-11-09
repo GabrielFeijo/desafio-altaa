@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import api from "@/services/api";
 import { Company } from "@/types";
 import { Users } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
@@ -12,6 +11,7 @@ import { MembersTableServer } from "@/components/company/members-table-server";
 import CompanySkeleton from "@/components/skeleton/company-skeleton";
 import { translateRole } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import api from "@/lib/actions/api";
 
 async function getCompany(id: string): Promise<Company | null> {
   try {

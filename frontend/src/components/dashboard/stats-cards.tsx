@@ -1,25 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Users, Shield, Clock } from "lucide-react";
 import { Company } from "@/types";
-import api from "@/services/api";
-import { cookies } from "next/headers";
+import api from "@/lib/actions/api";
+
+export const dynamic = 'force-dynamic';
 
 async function getCompanies(): Promise<Company[]> {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token");
-
-        if (!token) return [];
-
-        const response = await api.get("/companies?page=1&limit=1000", {
-            headers: {
-                Cookie: `token=${token.value}`,
-            },
-        });
-
+        const response = await api.get("/companies?page=1&limit=1000");
         return response.data.data || [];
-    } catch (error) {
-        console.error("Error fetching companies:", error);
+    } catch {
         return [];
     }
 }
