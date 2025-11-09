@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { getInitials } from "@/lib/utils";
-import { authService } from "@/services/auth.service";
+import { logoutAction } from "@/lib/actions/auth.actions";
 
 interface UserData {
     id: string;
@@ -35,7 +35,7 @@ export function UserNavClient({ user }: UserNavClientProps) {
     const handleLogout = () => {
         startTransition(async () => {
             try {
-                await authService.logout();
+                await logoutAction();
                 router.push("/login");
                 toast.success("Logout realizado com sucesso!");
             } catch {

@@ -99,3 +99,24 @@ export async function getCurrentUser() {
 		return null;
 	}
 }
+
+export async function logoutAction() {
+	try {
+		const response = await api.post('/auth/logout');
+		const cookieStore = await cookies();
+		cookieStore.delete('token');
+		return {
+			success: true,
+			message: response.data.message || 'Logout realizado com sucesso!',
+		};
+	} catch (err) {
+		const error = err as AxiosError<{ message?: string }>;
+		const errorMessage =
+			error.response?.data?.message ?? error.message ?? 'Erro ao fazer logout';
+
+		return {
+			success: false,
+			message: errorMessage,
+		};
+	}
+}
