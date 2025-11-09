@@ -62,7 +62,10 @@ export function InviteDialogTrigger({ companyId }: { companyId: string }) {
 
             if (result.success) {
                 toast.success("Convite enviado com sucesso!");
-                toast.info(`Token: ${result.data.invite.token}`, { duration: 10000 });
+                const baseURL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+                const inviteUrl = `${baseURL}/accept-invite/?token=${result.data.invite.token}`;
+                toast.info(`A URL de convite foi copiada para o clipboard \n ${inviteUrl}`, { duration: 10000 });
+                await navigator.clipboard.writeText(inviteUrl);
                 form.reset();
                 setOpen(false);
                 router.refresh();

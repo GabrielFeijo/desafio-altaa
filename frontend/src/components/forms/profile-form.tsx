@@ -91,7 +91,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                 <Input
                                     type="email"
                                     placeholder="seu@email.com"
-                                    disabled={isPending}
+                                    disabled={true}
                                     {...field}
                                 />
                             </FormControl>
