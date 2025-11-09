@@ -35,6 +35,8 @@ export function translateRole(role: string): string {
 }
 
 export function getInitials(name: string): string {
+	if (!name) return '';
+
 	const parts = name.trim().split(/\s+/);
 
 	if (parts.length === 0) return '';

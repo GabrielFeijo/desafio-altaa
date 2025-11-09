@@ -225,24 +225,13 @@ frontend/
 
 ---
 
-## 🧪 Testes E2E
-
-### Playwright
-
-Testes end-to-end com Playwright:
+## 🧪 Testes
 
 ```bash
-# Instalar dependências
-npx playwright install
-
 # Executar testes
-npm run test:e2e
+npm run test
 
-# UI interativa
-npm run test:e2e:ui
-
-# Com browser visível
-npm run test:e2e:headed
+npm run test:watch
 ```
 
 ---
@@ -256,12 +245,6 @@ npm run build            # Build para produção
 npm start                # Inicia produção
 
 # Testes
-npm run test:e2e         # Testes E2E
-npm run test:e2e:ui      # UI do Playwright
-npm run test:e2e:headed  # Browser visível
-
-# Qualidade de Código
-npm run lint             # ESLint
-npm run type-check       # TypeScript check
+npm run test
 
 ```

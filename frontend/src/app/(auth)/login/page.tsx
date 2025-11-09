@@ -77,7 +77,7 @@ export default function LoginPage() {
                     </CardDescription>
                 </CardHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
                         <CardContent className="space-y-4">
                             <FormField
                                 control={form.control}
@@ -103,30 +103,30 @@ export default function LoginPage() {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Senha</FormLabel>
-                                        <FormControl>
-                                            <div className="relative">
+                                        <div className="relative">
+                                            <FormControl>
                                                 <Input
                                                     type={showPassword ? "text" : "password"}
                                                     placeholder="••••••••"
                                                     disabled={isPending}
                                                     {...field}
                                                 />
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                    disabled={isPending}
-                                                >
-                                                    {showPassword ? (
-                                                        <EyeOff className="h-4 w-4" />
-                                                    ) : (
-                                                        <Eye className="h-4 w-4" />
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        </FormControl>
+                                            </FormControl>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                disabled={isPending}
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                            </Button>
+                                        </div>
                                         <FormMessage />
                                     </FormItem>
                                 )}

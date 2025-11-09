@@ -62,7 +62,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
                 <FormField
                     control={form.control}
                     name="name"
