@@ -61,7 +61,7 @@ docker-compose exec backend npm run prisma:seed
 
    ```bash
    git clone https://github.com/GabrielFeijo/desafio-altaa.git
-   cd altaa.ai/backend
+   cd desafio-altaa/backend
    npm install
    ```
 

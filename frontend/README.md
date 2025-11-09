@@ -73,7 +73,7 @@ docker-compose up -d frontend
 
    ```bash
    https://github.com/GabrielFeijo/desafio-altaa.git
-   cd altaa.ai/frontend
+   cd desafio-altaa/frontend
    npm install
    ```
 

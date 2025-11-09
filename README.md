@@ -71,7 +71,7 @@ Certifique-se de ter instalado:
 
    ```bash
    git clone https://github.com/GabrielFeijo/desafio-altaa.git
-   cd altaa.ai
+   cd desafio-altaa
    ```
 
 2. **Inicie os serviços**
