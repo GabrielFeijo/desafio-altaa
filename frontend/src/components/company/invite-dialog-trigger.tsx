@@ -58,22 +58,74 @@ export function InviteDialogTrigger({ companyId }: { companyId: string }) {
 
     const onSubmit = async (data: InviteFormValues) => {
         startTransition(async () => {
-            const result = await inviteMemberAction(companyId, data.email, data.role);
+            try {
+                const result = await inviteMemberAction(companyId, data.email, data.role);
 
-            if (result.success) {
-                toast.success("Convite enviado com sucesso!");
+                if (!result.success) {
+                    toast.error(result.message);
+                    return;
+                }
+
                 const baseURL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
                 const inviteUrl = `${baseURL}/accept-invite/?token=${result.data.invite.token}`;
-                toast.info(`A URL de convite foi copiada para o clipboard \n ${inviteUrl}`, { duration: 10000 });
-                await navigator.clipboard.writeText(inviteUrl);
+
+                toast.success("Convite enviado com sucesso!");
+
+                const copied = await copyToClipboard(inviteUrl);
+
+                if (copied) {
+                    toast.info(
+                        `Link copiado para a área de transferência!\n\n${inviteUrl}`,
+                        { duration: 2000 }
+                    );
+                }
+
+                if (!copied) {
+                    const shared = await shareUrl(inviteUrl);
+
+                    if (!shared) {
+                        toast.info(`📋 Link do convite:\n\n${inviteUrl}`, { duration: 4000 });
+                    }
+                }
+
                 form.reset();
                 setOpen(false);
                 router.refresh();
-            } else {
-                toast.error(result.message);
+            } catch {
+                toast.error("Erro inesperado. Tente novamente.");
             }
         });
     };
+
+    async function copyToClipboard(text: string): Promise<boolean> {
+        if (!navigator?.clipboard?.writeText) {
+            return false;
+        }
+
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    async function shareUrl(url: string): Promise<boolean> {
+        if (!navigator?.share) {
+            return false;
+        }
+
+        try {
+            await navigator.share({
+                title: "Convite para empresa",
+                text: "Você foi convidado. Acesse o link:",
+                url: url,
+            });
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
