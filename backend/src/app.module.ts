@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
 import { MembershipModule } from './membership/membership.module';
 import { InviteModule } from './invite/invite.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
 	imports: [
@@ -13,6 +14,7 @@ import { InviteModule } from './invite/invite.module';
 			isGlobal: true,
 		}),
 		PrismaModule,
+		EmailModule,
 		AuthModule,
 		UserModule,
 		CompanyModule,

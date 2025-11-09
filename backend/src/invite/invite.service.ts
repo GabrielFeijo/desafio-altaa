@@ -8,10 +8,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInviteDto } from './dto/create-invite.dto';
 import { Role } from '@prisma/client';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class InviteService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private emailService: EmailService
+	) {}
 
 	async create(
 		createInviteDto: CreateInviteDto,
@@ -104,8 +108,13 @@ export class InviteService {
 			},
 		});
 
-		console.log(`Acesse: http://localhost:3000/accept-invite?token=${token}`);
-		// https://altaa.gabrielfeijo.com.br/accept-invite?token=${token} - PROD
+		await this.emailService.sendInviteEmail({
+			invitedEmail: invite.email,
+			companyName: invite.company.name,
+			role: invite.role,
+			inviteToken: invite.token,
+			expiresAt: invite.expiresAt,
+		});
 
 		return {
 			id: invite.id,
