@@ -46,7 +46,7 @@ async function CompanyContent({ id }: { id: string }) {
     <div className="space-y-6">
       <BackButton />
 
-      <div className="flex items-start justify-between flex-wrap gap-4">
+      <div className="flex items-start justify-between flex-wrap gap-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">{company.name}</h1>
           <div className="text-muted-foreground flex gap-1.5">

@@ -145,7 +145,7 @@ export function InviteDialogTrigger({ companyId }: { companyId: string }) {
                             >
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={isPending}>
+                            <Button type="submit" disabled={isPending} className="mb-4 sm:mb-0">
                                 {isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
