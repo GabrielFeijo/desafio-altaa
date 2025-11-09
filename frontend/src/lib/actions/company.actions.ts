@@ -1,17 +1,18 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import api from '@/services/api';
+import api from '@/lib/actions/api';
 import { Role } from '@/types';
 import { AxiosError } from 'axios';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-async function getAuthHeaders() {
-	const cookieStore = await cookies();
-	const token = cookieStore.get('token');
-	return {
-		Cookie: `token=${token?.value}`,
-	};
+async function handleAuthError(error: AxiosError) {
+	if (error.status === 401) {
+		const cookieStore = await cookies();
+		cookieStore.delete('token');
+		redirect('/login?expired=true');
+	}
 }
 
 export async function createCompanyAction(formData: FormData) {
@@ -19,17 +20,16 @@ export async function createCompanyAction(formData: FormData) {
 	const logo = formData.get('logo') as string;
 
 	try {
-		const headers = await getAuthHeaders();
-		const response = await api.post(
-			'/company',
-			{ name, logo: logo || undefined },
-			{ headers }
-		);
+		const response = await api.post('/company', {
+			name,
+			logo: logo || undefined,
+		});
 
 		revalidatePath('/dashboard');
 		return { success: true, data: response.data };
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ?? error.message ?? 'Erro ao criar empresa';
 
@@ -48,18 +48,17 @@ export async function updateCompanyAction(
 	const logo = formData.get('logo') as string;
 
 	try {
-		const headers = await getAuthHeaders();
-		const response = await api.put(
-			`/company/${companyId}`,
-			{ name, logo: logo || undefined },
-			{ headers }
-		);
+		const response = await api.put(`/company/${companyId}`, {
+			name,
+			logo: logo || undefined,
+		});
 
 		revalidatePath('/dashboard');
 		revalidatePath(`/company/${companyId}`);
 		return { success: true, data: response.data };
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -78,17 +77,16 @@ export async function inviteMemberAction(
 	role: Role
 ) {
 	try {
-		const headers = await getAuthHeaders();
-		const response = await api.post(
-			`/company/${companyId}/invite`,
-			{ email, role },
-			{ headers }
-		);
+		const response = await api.post(`/company/${companyId}/invite`, {
+			email,
+			role,
+		});
 
 		revalidatePath(`/company/${companyId}`);
 		return { success: true, data: response.data };
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -103,13 +101,12 @@ export async function inviteMemberAction(
 
 export async function removeMemberAction(companyId: string, memberId: string) {
 	try {
-		const headers = await getAuthHeaders();
-		await api.delete(`/company/${companyId}/member/${memberId}`, { headers });
+		await api.delete(`/company/${companyId}/member/${memberId}`);
 
 		revalidatePath(`/company/${companyId}`);
 		return { success: true };
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -128,17 +125,13 @@ export async function updateMemberRoleAction(
 	role: Role
 ) {
 	try {
-		const headers = await getAuthHeaders();
-		await api.patch(
-			`/company/${companyId}/member/${memberId}`,
-			{ role },
-			{ headers }
-		);
+		await api.patch(`/company/${companyId}/member/${memberId}`, { role });
 
 		revalidatePath(`/company/${companyId}`);
 		return { success: true };
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -153,13 +146,13 @@ export async function updateMemberRoleAction(
 
 export async function selectCompanyAction(companyId: string) {
 	try {
-		const headers = await getAuthHeaders();
-		await api.post(`/company/${companyId}/select`, {}, { headers });
+		await api.post(`/company/${companyId}/select`);
 
 		revalidatePath('/dashboard');
 		return { success: true };
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -174,10 +167,8 @@ export async function selectCompanyAction(companyId: string) {
 
 export async function getCompaniesAction(page: number = 1, limit: number = 10) {
 	try {
-		const headers = await getAuthHeaders();
 		const response = await api.get('/companies', {
 			params: { page, limit },
-			headers,
 		});
 
 		return {
@@ -185,7 +176,8 @@ export async function getCompaniesAction(page: number = 1, limit: number = 10) {
 			data: response.data,
 		};
 	} catch (err) {
-		const error = err as AxiosError<{ message?: string }>;
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??

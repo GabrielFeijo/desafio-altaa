@@ -73,6 +73,6 @@ export interface InvitesResponse {
 
 export interface ApiError {
 	message: string;
-	statusCode: number;
+	status: number;
 	error?: string;
 }

@@ -1,8 +1,17 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import api from '@/services/api';
+import api from '@/lib/actions/api';
 import { AxiosError } from 'axios';
+import { redirect } from 'next/navigation';
+
+async function handleAuthError(error: AxiosError) {
+	if (error.status === 401) {
+		const cookieStore = await cookies();
+		cookieStore.delete('token');
+		redirect('/login?expired=true');
+	}
+}
 
 export async function loginAction(formData: FormData) {
 	const email = formData.get('email') as string;
@@ -81,23 +90,12 @@ export async function signupAction(formData: FormData) {
 
 export async function getCurrentUser() {
 	try {
-		const cookieStore = await cookies();
-		const token = cookieStore.get('token');
-
-		if (!token) return null;
-
-		const response = await api.post(
-			'/auth/me',
-			{},
-			{
-				headers: {
-					Cookie: `token=${token.value}`,
-				},
-			}
-		);
+		const response = await api.post('/auth/me');
 
 		return response.data;
-	} catch {
+	} catch (err) {
+		const error = err as AxiosError<{ message?: string; statusCode?: number }>;
+		await handleAuthError(error);
 		return null;
 	}
 }

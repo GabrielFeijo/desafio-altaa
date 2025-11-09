@@ -1,25 +1,26 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import api from '@/services/api';
+import api from '@/lib/actions/api';
 import { AxiosError } from 'axios';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-async function getAuthHeaders() {
-	const cookieStore = await cookies();
-	const token = cookieStore.get('token');
-	return {
-		Cookie: `token=${token?.value}`,
-	};
+async function handleAuthError(error: AxiosError) {
+	if (error.status === 401) {
+		const cookieStore = await cookies();
+		cookieStore.delete('token');
+		redirect('/login?expired=true');
+	}
 }
 
 export async function getUserProfile() {
 	try {
-		const headers = await getAuthHeaders();
-		const response = await api.get('/user/profile', { headers });
+		const response = await api.get('/user/profile');
 		return { success: true, data: response.data };
 	} catch (err) {
 		const error = err as AxiosError<{ message?: string }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -36,17 +37,13 @@ export async function updateUserProfileAction(formData: FormData) {
 	const email = formData.get('email') as string;
 
 	try {
-		const headers = await getAuthHeaders();
-		const response = await api.put(
-			'/user/profile',
-			{ name, email },
-			{ headers }
-		);
+		const response = await api.put('/user/profile', { name, email });
 
 		revalidatePath('/profile');
 		return { success: true, data: response.data };
 	} catch (err) {
 		const error = err as AxiosError<{ message?: string }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??
@@ -64,16 +61,12 @@ export async function updatePasswordAction(formData: FormData) {
 	const newPassword = formData.get('newPassword') as string;
 
 	try {
-		const headers = await getAuthHeaders();
-		await api.put(
-			'/user/password',
-			{ currentPassword, newPassword },
-			{ headers }
-		);
+		await api.put('/user/password', { currentPassword, newPassword });
 
 		return { success: true, message: 'Senha atualizada com sucesso' };
 	} catch (err) {
 		const error = err as AxiosError<{ message?: string }>;
+		await handleAuthError(error);
 		const errorMessage =
 			error.response?.data?.message ??
 			error.message ??

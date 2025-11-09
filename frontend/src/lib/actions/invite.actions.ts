@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import api from '@/services/api';
+import api from '@/lib/actions/api';
 import { AxiosError } from 'axios';
 
 export async function acceptInviteAction(formData: FormData) {
@@ -23,15 +23,7 @@ export async function acceptInviteAction(formData: FormData) {
 				};
 			}
 
-			const response = await api.post(
-				'/auth/accept-invite',
-				{ token },
-				{
-					headers: {
-						Cookie: `token=${userToken.value}`,
-					},
-				}
-			);
+			const response = await api.post('/auth/accept-invite', { token });
 
 			return {
 				success: true,
