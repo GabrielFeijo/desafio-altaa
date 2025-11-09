@@ -107,6 +107,8 @@ export class AuthController {
 	) {
 		const currentUserId = user?.userId || undefined;
 
+		console.log(currentUserId);
+
 		const result = await this.authService.acceptInvite(
 			acceptInviteDto,
 			currentUserId
