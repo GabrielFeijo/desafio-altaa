@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { User, LogOut, Settings, Loader2 } from "lucide-react";
+import { User, LogOut, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,10 +83,6 @@ export function UserNavClient({ user }: UserNavClientProps) {
                 >
                     <User className="mr-2 h-4 w-4" />
                     <span>Perfil</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled={isPending}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Configurações</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} disabled={isPending}>
