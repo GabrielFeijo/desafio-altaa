@@ -6,6 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { AlertCircle } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface AcceptInvitePageProps {
     searchParams: Promise<{ token?: string }>;

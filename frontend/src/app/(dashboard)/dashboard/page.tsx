@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import CompaniesTableSkeleton from "@/components/skeleton/companies-table-skeleton";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function DashboardPage() {
     return (

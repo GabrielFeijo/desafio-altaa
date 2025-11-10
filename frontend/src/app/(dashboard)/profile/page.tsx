@@ -8,6 +8,7 @@ import ProfileSkeleton from "@/components/skeleton/profile-skeleton";
 import { getInitials } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function ProfileContent() {
     const result = await getUserProfile();

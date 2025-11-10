@@ -4,6 +4,7 @@ import { Company } from "@/types";
 import api from "@/lib/actions/api";
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getCompanies(): Promise<Company[]> {
     try {
